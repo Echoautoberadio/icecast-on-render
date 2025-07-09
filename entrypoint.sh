@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# Use default port if $PORT not set
+# Use Render's PORT if available, default to 8000
 PORT=${PORT:-8000}
 
 cat > /etc/icecast.xml << EOF
@@ -24,7 +24,6 @@ cat > /etc/icecast.xml << EOF
 
     <listen-socket>
         <port>${PORT}</port>
-        <!-- Allow connections from any IP -->
         <bind-address>0.0.0.0</bind-address>
     </listen-socket>
     
@@ -41,7 +40,5 @@ cat > /etc/icecast.xml << EOF
 </icecast>
 EOF
 
-echo "✅ Icecast configuration generated"
-echo "Starting Icecast server on port ${PORT}..."
-
+echo "✅ Icecast configuration generated for ${ICECAST_HOSTNAME}:${PORT}"
 exec icecast -c /etc/icecast.xml

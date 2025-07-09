@@ -1,4 +1,3 @@
-# Updated Dockerfile
 FROM ghcr.io/libretime/icecast:2.4.4
 
 ENV ICECAST_SOURCE_PASSWORD=hackme \
@@ -7,9 +6,11 @@ ENV ICECAST_SOURCE_PASSWORD=hackme \
     ICECAST_HOSTNAME=icecast-on-render-pj7t.onrender.com \
     ICECAST_LISTEN_PORT=${PORT}
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+# Copy to a user-writable location instead of system bin
+COPY entrypoint.sh /app/entrypoint.sh
 
-# 🔧 ADD THIS LINE (fixes permission issue)
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Set permissions using COPY's built-in chmod
+COPY --chmod=+x entrypoint.sh /app/entrypoint.sh
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# Use the new location
+ENTRYPOINT ["/app/entrypoint.sh"]
