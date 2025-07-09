@@ -1,16 +1,20 @@
 FROM ghcr.io/libretime/icecast:2.4.4
 
+# Set environment variables
 ENV ICECAST_SOURCE_PASSWORD=hackme \
     ICECAST_ADMIN_PASSWORD=hackme \
     ICECAST_ADMIN_USERNAME=admin \
     ICECAST_HOSTNAME=icecast-on-render-pj7t.onrender.com \
     ICECAST_LISTEN_PORT=${PORT}
 
-# Copy to a user-writable location instead of system bin
-COPY entrypoint.sh /app/entrypoint.sh
+# Create a writable directory for our files
+RUN mkdir -p /app && chown -R icecast:icecast /app
 
-# Set permissions using COPY's built-in chmod
-COPY --chmod=+x entrypoint.sh /app/entrypoint.sh
+# Copy entrypoint to a user-writable location
+COPY --chown=icecast:icecast --chmod=+x entrypoint.sh /app/entrypoint.sh
 
-# Use the new location
+# Switch to non-root user
+USER icecast
+
+# Use the entrypoint script
 ENTRYPOINT ["/app/entrypoint.sh"]

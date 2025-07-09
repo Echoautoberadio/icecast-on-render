@@ -1,10 +1,21 @@
 #!/bin/sh
 set -e
 
+# Debugging output
+echo "=== Starting Icecast Server ==="
+echo "Hostname: ${ICECAST_HOSTNAME}"
+echo "Port: ${PORT}"
+echo "Admin: ${ICECAST_ADMIN_USERNAME}"
+echo "Source Password: ${ICECAST_SOURCE_PASSWORD}"
+echo "Admin Password: ${ICECAST_ADMIN_PASSWORD}"
+
 # Use Render's PORT if available, default to 8000
 PORT=${PORT:-8000}
 
-cat > /etc/icecast.xml << EOF
+# Create configuration in user-writable space
+CONFIG_PATH="/tmp/icecast.xml"
+
+cat > "${CONFIG_PATH}" << EOF
 <icecast>
     <location>Render</location>
     <admin>${ICECAST_ADMIN_USERNAME}</admin>
@@ -40,5 +51,8 @@ cat > /etc/icecast.xml << EOF
 </icecast>
 EOF
 
-echo "✅ Icecast configuration generated for ${ICECAST_HOSTNAME}:${PORT}"
-exec icecast -c /etc/icecast.xml
+echo "✅ Configuration generated at ${CONFIG_PATH}"
+echo "=== Starting Icecast ==="
+
+# Start Icecast with the generated config
+exec icecast -c "${CONFIG_PATH}"
