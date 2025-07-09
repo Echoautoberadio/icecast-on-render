@@ -1,9 +1,41 @@
 #!/bin/sh
+set -e
 
-# Remplace le port dans le fichier de configuration XML
-PORT=${PORT:-8000}
-echo "🔧 Setting port to $PORT in icecast.xml"
-sed -i "s/<port>8000<\/port>/<port>$PORT<\/port>/" /etc/icecast2/icecast.xml
+# Generate config using environment variables
+cat > /etc/icecast.xml << EOF
+<icecast>
+    <location>Render</location>
+    <admin>${ICECAST_ADMIN_USERNAME}</admin>
+    
+    <limits>
+        <clients>100</clients>
+        <sources>4</sources>
+        <queue-size>524288</queue-size>
+        <source-timeout>10</source-timeout>
+    </limits>
 
-# Lancer Icecast
-exec /usr/bin/icecast -c /etc/icecast2/icecast.xml
+    <authentication>
+        <source-password>${ICECAST_SOURCE_PASSWORD}</source-password>
+        <admin-user>${ICECAST_ADMIN_USERNAME}</admin-user>
+        <admin-password>${ICECAST_ADMIN_PASSWORD}</admin-password>
+    </authentication>
+
+    <listen-socket>
+        <port>${ICECAST_LISTEN_PORT}</port>
+    </listen-socket>
+    
+    <hostname>${ICECAST_HOSTNAME}</hostname>
+    
+    <fileserve>1</fileserve>
+    
+    <paths>
+        <basedir>/usr/share/icecast</basedir>
+        <logdir>/var/log/icecast</logdir>
+        <webroot>/usr/share/icecast/web</webroot>
+        <adminroot>/usr/share/icecast/admin</adminroot>
+    </paths>
+</icecast>
+EOF
+
+# Start Icecast server
+exec icecast -c /etc/icecast.xml
